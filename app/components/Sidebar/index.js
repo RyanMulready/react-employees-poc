@@ -30,7 +30,7 @@ class Sidebar extends React.PureComponent { // eslint-disable-line react/prefer-
           </Menu.Item>
           <Menu.Item key="2">
             <Icon type="user" />
-            <span className="nav-text"><Link to="/employees">Employees</Link></span>
+            <span className="nav-text"><Link to="employees"><FormattedMessage {...messages.employees} /></Link></span>
           </Menu.Item>
         </Menu>
       </Sider>

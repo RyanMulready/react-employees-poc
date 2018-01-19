@@ -6,71 +6,59 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import injectSaga from 'utils/injectSaga';
 import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { compose } from 'redux';
 import { Table } from 'antd';
+import { makeSelectEmployees, makeSelectMetaData, makeSelectLoading, makeSelectError } from 'containers/App/selectors';
+import { createStructuredSelector } from 'reselect';
 import messages from './messages';
-
-const columns = [{
-  title: 'Name',
-  dataIndex: 'name',
-  render: text => <a href="#">{text}</a>,
-}, {
-  title: 'Age',
-  dataIndex: 'age',
-}, {
-  title: 'Address',
-  dataIndex: 'address',
-}];
-const data = [{
-  key: '1',
-  name: 'John Brown',
-  age: 32,
-  address: 'New York No. 1 Lake Park',
-}, {
-  key: '2',
-  name: 'Jim Green',
-  age: 42,
-  address: 'London No. 1 Lake Park',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: 'Sidney No. 1 Lake Park',
-}, {
-  key: '4',
-  name: 'Disabled User',
-  age: 99,
-  address: 'Sidney No. 1 Lake Park',
-}];
+import { getEmployees, getMetadata } from './saga';
 
 const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-  },
-  getCheckboxProps: record => ({
-    disabled: record.name === 'Disabled User', // Column configuration not to be checked
-  }),
 };
 
 export class Employees extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
+  createNameLink(text, row) {
+    return (
+      <span>
+        <a href={"/employee/" + row.id}>{row.lastname}, {row.firstname}</a>
+      </span>
+    );
+  }
   render() {
+    if(this.props.metadata) {
+      this.props.metadata.columns.employeescolumns[0].render = (text, row) => this.createNameLink(text, row)
+    }
     return (
       <div>
         <Helmet>
           <title>Employees</title>
           <meta name="description" content="Description of Employees" />
         </Helmet>
-        <Table rowSelection={rowSelection} columns={columns} dataSource={data} />
+        {(this.props.employees && this.props.metadata) &&
+          <Table rowSelection={rowSelection} columns={this.props.metadata.columns.employeescolumns} dataSource={this.props.employees} />
+        }
       </div>
     );
   }
 }
 
 Employees.propTypes = {
-  dispatch: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
+  ]),
+  employees: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.bool,
+  ]),
+  metadata: PropTypes.oneOfType([
+    PropTypes.object
+  ])
 };
 
 
@@ -80,8 +68,19 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const withConnect = connect(null, mapDispatchToProps);
+const mapStateToProps = createStructuredSelector({
+  employees: makeSelectEmployees(),
+  metadata: makeSelectMetaData(),
+  loading: makeSelectLoading(),
+  error: makeSelectError(),
+});
+
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const employeesSaga = injectSaga({ key: 'employees', saga: getEmployees });
+const metaDataSaga = injectSaga({ key: 'metadata', saga: getMetadata });
 
 export default compose(
+  employeesSaga,
+  metaDataSaga,
   withConnect,
 )(Employees);

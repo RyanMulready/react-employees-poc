@@ -10,3 +10,11 @@
  */
 
 export const DEFAULT_LOCALE = 'en';
+
+export const LOAD_EMPLOYEES = "react/App/LOAD_EMPLOYEES"
+export const LOAD_EMPLOYEES_SUCCESS = "react/App/LOAD_EMPLOYEES_SUCCESS"
+export const LOAD_EMPLOYEES_ERROR = "react/App/LOAD_EMPLOYEES_ERROR"
+
+export const LOAD_METADATA = "react/App/LOAD_METADATA"
+export const LOAD_METADATA_SUCCESS = "react/App/LOAD_METADATA_SUCCESS"
+export const LOAD_METADATA_ERROR = "react/App/LOAD_METADATA_ERROR"
